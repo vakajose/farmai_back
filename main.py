@@ -1,5 +1,10 @@
 from fastapi import FastAPI
 from routers import auth
+import os
+import logging
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(
     title="FarmAI Backend API",
@@ -11,6 +16,15 @@ app = FastAPI(
     }
 )
 
+# Configurar logging
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+
+level = os.getenv('LOG_LEVEL', 'INFO')
+
+logging.basicConfig(filename='logs/app.log', level=level, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Incluir los routers
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 
 
@@ -19,7 +33,7 @@ async def root():
     """
     Endpoint principal de bienvenida de la API.
     """
-    return {"message": "Welcome to Farmai Backend"}
+    return {"message": "Welcome to FarmAI Backend"}
 
 if __name__ == "__main__":
     import uvicorn

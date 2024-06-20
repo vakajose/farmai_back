@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from schemas import UserCreate, UserLogin, UserResponse
 from services.firebase import create_user, get_user_by_username
+import logging
 
 router = APIRouter()
 
@@ -32,5 +33,6 @@ async def login(user: UserLogin):
     """
     db_user = get_user_by_username(user.username)
     if not db_user or db_user['password'] != user.password:
+        logging.log(logging.INFO, f"Invalid credentials for user {user.username}")
         raise HTTPException(status_code=400, detail="Invalid credentials")
     return UserResponse(username=user.username)

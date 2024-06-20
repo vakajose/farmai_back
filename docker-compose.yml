@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: farmai_backend_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+    networks:
+      - farmai_network
+    restart: always
+
+networks:
+  farmai_network:
+    driver: bridge
+
+volumes:
+  logs:
