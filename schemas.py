@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
 
 class UserCreate(BaseModel):
@@ -16,10 +16,13 @@ class UserLogin(BaseModel):
 class UserResponse(BaseModel):
     username: str = Field(..., description="El nombre de usuario")
 
+class Punto(BaseModel):
+    latitude: float = Field(..., example="-17.816365", description="Valor de la latitud del punto en coordenadas")
+    longitude: float = Field(..., example="-17.816365", description="Valor de la longitud del punto en coordenadas")
 
 class ParcelaBase(BaseModel):
     nombre: str = Field(..., example="Mi Parcela", description="El nombre referencial de la parcela")
-    ubicacion: str = Field(..., example="Coordenadas", description="La ubicacion de la parcela")
+    ubicacion: List[Punto] = Field(..., example="[{\"latitude\":-17.816365,\"longitude\":-17.816365},{\"latitude\":-17.816365,\"longitude\":-17.816365}]", description="Lista de puntos de coordenadas que determina el poligono de la parcela")
 
 
 class ParcelaCreate(ParcelaBase):
