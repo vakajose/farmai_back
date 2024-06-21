@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import auth
+from routers import auth, parcela
 import os
 import logging
 from dotenv import load_dotenv
@@ -26,7 +26,7 @@ logging.basicConfig(filename='logs/app.log', level=level, format='%(asctime)s - 
 
 # Incluir los routers
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
-
+app.include_router(parcela.router,prefix="/parcelas", tags=["parcelas"])
 
 @app.get("/", summary="Endpoint de Bienvenida", response_description="Mensaje de bienvenida")
 async def root():

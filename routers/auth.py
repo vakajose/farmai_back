@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from schemas import UserCreate, UserLogin, UserResponse
-from services.firebase import create_user, get_user_by_username
+from starlette import status
+from models import *
 import logging
 
 router = APIRouter()
@@ -15,10 +16,11 @@ async def register(user: UserCreate):
     - **username**: El nombre de usuario para registro.
     - **password**: La contraseña del usuario para registro.
     """
-    existing_user = get_user_by_username(user.username)
+    existing_user = User.get_user_by_username(user.username)
     if existing_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
-    create_user(user.dict())
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already registered")
+    new_user = User(username=user.username, password=user.password)
+    new_user.create_user()
     return UserResponse(username=user.username)
 
 
@@ -31,8 +33,8 @@ async def login(user: UserLogin):
     - **username**: El nombre de usuario para inicio de sesión.
     - **password**: La contraseña del usuario para inicio de sesión.
     """
-    db_user = get_user_by_username(user.username)
+    db_user = User.get_user_by_username(user.username)
     if not db_user or db_user['password'] != user.password:
         logging.log(logging.INFO, f"Invalid credentials for user {user.username}")
-        raise HTTPException(status_code=400, detail="Invalid credentials")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     return UserResponse(username=user.username)
