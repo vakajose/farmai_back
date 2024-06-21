@@ -76,8 +76,8 @@ class Parcela(BaseModel):
     def delete(parcela_id):
         parcela_ref = db.collection('parcelas').document(parcela_id)
         parcela_ref.delete()
-        
-        
+
+
 class Parcela(BaseModel):
     id: Optional[str]
     nombre: str
@@ -121,6 +121,15 @@ class Parcela(BaseModel):
         for parcela in parcelas_ref:
             return Parcela.from_dict(parcela.to_dict())
         return None
+
+    @staticmethod
+    def get_all(usuario_id):
+        user_ref = db.collection(f'{prefix}users').document(usuario_id)
+        parcelas_ref = user_ref.collection('parcelas').stream()
+        parcelas = []
+        for parcela in parcelas_ref:
+            parcelas.append(Parcela.from_dict(parcela.to_dict()))
+        return parcelas
 
     @staticmethod
     def delete(usuario_id, parcela_id):
