@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from models import Parcela
-from schemas import ParcelaCreate, Parcela
+from schemas import ParcelaCreate, ParcelaResponse
 from typing import List
 from starlette import status
 
 router = APIRouter()
 
 
-@router.post("/create", response_model=Parcela, summary="Crear una nueva parcela",
+@router.post("/create", response_model=ParcelaResponse, summary="Crear una nueva parcela",
              description="Crear una nueva parcela para un usuario especifico")
 def create_parcela(parcela: ParcelaCreate):
     new_parcela = Parcela(**parcela.dict(), id=parcela.nombre.replace(" ", "_").lower())
@@ -15,7 +15,7 @@ def create_parcela(parcela: ParcelaCreate):
     return new_parcela
 
 
-@router.get("/{usuario_id}/{parcela_id}", response_model=Parcela, summary="Obtener una parcela por ID",
+@router.get("/{usuario_id}/{parcela_id}", response_model=ParcelaResponse, summary="Obtener una parcela por ID",
             description="Obtener los detalles de una parcela especifica por su ID")
 def read_parcela(usuario_id: str, parcela_id: str):
     parcela = Parcela.get_by_id(usuario_id, parcela_id)
@@ -24,7 +24,7 @@ def read_parcela(usuario_id: str, parcela_id: str):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parcela no encontrada")
 
 
-@router.get("/{usuario_id}", response_model=List[Parcela],
+@router.get("/{usuario_id}", response_model=List[ParcelaResponse],
             summary="Obtener todas las parcelas de un usuario por ID usuario",
             description="Obtener los detalles de todas las parcelas por ID usuario")
 def read_all_parcelas(usuario_id: str):
@@ -41,7 +41,7 @@ def delete_parcela(usuario_id: str, parcela_id: str):
     return {"message": "Parcela eliminada correctamente"}
 
 
-@router.put("/{usuario_id}/{parcela_id}", response_model=Parcela, summary="Actualizar una parcela por ID",
+@router.put("/{usuario_id}/{parcela_id}", response_model=ParcelaResponse, summary="Actualizar una parcela por ID",
             description="Actualizar los detalles de una parcela especifica por su ID")
 def update_parcela(usuario_id: str, parcela_id: str, parcela: ParcelaCreate):
     existing_parcela = Parcela.get_by_id(usuario_id, parcela_id)

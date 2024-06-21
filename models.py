@@ -55,46 +55,7 @@ class Parcela(BaseModel):
 
     def to_dict(self):
         return {
-            "nombre": self.nombre,
-            "ubicacion": self.ubicacion,
-            "usuario_id": self.usuario_id
-        }
-
-    @staticmethod
-    def get_by_id(parcela_id):
-        parcela_ref = db.collection('parcelas').document(parcela_id)
-        parcela_doc = parcela_ref.get()
-        if parcela_doc.exists:
-            return Parcela.from_dict(parcela_doc.to_dict())
-        return None
-
-    def save(self):
-        parcela_ref = db.collection('parcelas').document(self.id)
-        parcela_ref.set(self.to_dict())
-
-    @staticmethod
-    def delete(parcela_id):
-        parcela_ref = db.collection('parcelas').document(parcela_id)
-        parcela_ref.delete()
-
-
-class Parcela(BaseModel):
-    id: Optional[str]
-    nombre: str
-    ubicacion: str
-    usuario_id: str
-
-    @staticmethod
-    def from_dict(source):
-        return Parcela(
-            id=source.get('id'),
-            nombre=source.get('nombre'),
-            ubicacion=source.get('ubicacion'),
-            usuario_id=source.get('usuario_id')
-        )
-
-    def to_dict(self):
-        return {
+            "id": self.id,
             "nombre": self.nombre,
             "ubicacion": self.ubicacion,
             "usuario_id": self.usuario_id

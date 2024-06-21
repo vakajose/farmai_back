@@ -26,7 +26,7 @@ class ParcelaCreate(ParcelaBase):
     usuario_id: str = Field(..., example="devuser", description="El username del usuario propietario de la parcela")
 
 
-class Parcela(ParcelaBase):
+class ParcelaResponse(ParcelaBase):
     id: Optional[str] = Field(None, example="parcela_id_123", description="El ID de la parcela, es unico y no admite espacios")
     usuario_id: str = Field(..., example="devuser", description="El username del usuario propietario de la parcela")
 
