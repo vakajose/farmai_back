@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth, parcela
+from routers import analysis, auth, parcela
 import os
 import logging
 from dotenv import load_dotenv
@@ -37,6 +37,7 @@ logging.basicConfig(filename='logs/app.log', level=level, format='%(asctime)s - 
 # Incluir los routers
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(parcela.router, prefix="/parcelas", tags=["parcelas"])
+app.include_router(analysis.router, prefix="/analysis", tags=["analysis"])
 
 
 @app.get("/", summary="Endpoint de Bienvenida", response_description="Mensaje de bienvenida")

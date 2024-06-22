@@ -11,7 +11,7 @@ client = OpenAI(
 )
 
 def analyze_images(diagnosis_type: str, image_paths: List[str]) -> str:
-    msgInstructions = f"Analiza estas imágenes para: {diagnosis_type}, devuelve si hay alguna enfermedad o plaga, que tipo de enfermedad o plaga es y si es necesario aplicar algún tratamiento. Determina si es necesario realizar un análisis más profundo y qué tipo de análisis sería. Especifica si es necesario realizar un análisis más profundo y qué tipo de análisis sería."
+    msgInstructions = f"Analiza estas imágenes para: {diagnosis_type}, devuelve si hay alguna enfermedad o plaga, que tipo de enfermedad o plaga es y si es necesario aplicar algún tratamiento. Determina si es necesario realizar un análisis más profundo y qué tipo de análisis sería. Especifica si es necesario realizar un análisis más profundo y qué tipo de análisis sería. La respuesta debe estar en formato Markdown."
     messages = [
         {
             "role": "user",
