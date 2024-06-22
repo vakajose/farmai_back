@@ -53,18 +53,17 @@ class ParcelaResponse(ParcelaBase):
         from_attributes = True
 
 
-class AnalisisBase(BaseModel):
-    fecha: datetime = Field(..., example="2024-06-21T00:00:00", description="Fecha y hora del analisis")
+class AnalisisCreate(BaseModel):
     imagenes: List[ImagenSatelital] = Field(...,
                                             example="[{\"tipo\":\"ROJO\",\"ruta\":\"/path/to/image.png\"},{\"tipo\":\"NIR\",\"ruta\":\"/path/to/image.png\"}]",
                                             description="Lista de imagenes satelitales")
     tipo: str = Field(..., example="NDVI", description="Tipo de analisis")
-    evaluacion: str = Field(None, example="Healthy",
+
+
+class AnalisisBase(AnalisisCreate):
+    fecha: datetime = Field(..., example="2024-06-21T00:00:00", description="Fecha y hora del analisis")
+    evaluacion: Optional[str] = Field(None, example="Healthy",
                             description="Resultado de la evaluacion del diagnostico hecho por la IA")
-
-
-class AnalisisCreate(AnalisisBase):
-    pass
 
 
 class AnalisisResponse(AnalisisBase):

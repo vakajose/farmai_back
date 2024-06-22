@@ -161,11 +161,11 @@ class Parcela(BaseModel):
 
 
 class Analisis(BaseModel):
-    fecha: datetime
+    fecha: Optional[datetime] = None
     imagenes: List[ImagenSatelital]
     tipo: str
-    evaluacion: Optional[str]
-    id: Optional[str]
+    evaluacion: Optional[str] = None
+    id: Optional[str] = None
 
     @staticmethod
     def from_dict(source):
@@ -188,9 +188,14 @@ class Analisis(BaseModel):
         }
 
     def save(self, usuario_id: str, parcela_id: str):
+        if not self.fecha:
+            self.fecha = datetime.now()
         if not self.id:
             self.id = f"{self.fecha.strftime('%Y%m%d')}_{self.tipo}"
-        analisis_ref = db.document(f'{prefix}users/{usuario_id}/parcelas/{parcela_id}/analisis/{self.id}')
+        parcela_ref = db.document(f'{prefix}users/{usuario_id}/parcelas/{parcela_id}')
+        if not parcela_ref.get().exists:
+            raise ValueError("Parcela no existe")
+        analisis_ref = parcela_ref.collection('analisis').document(self.id)
         analisis_ref.set(self.to_dict())
 
     @staticmethod
