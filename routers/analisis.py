@@ -106,10 +106,10 @@ def ejecutar_analisis(usuario_id: str, parcela_id: str, tipo: str = 'identificac
             nuevo_analisis.save(usuario_id, parcela_id)
             return nuevo_analisis
 
-    @router.get("/ejecutarplaga/{usuario_id}/{parcela_id}/", response_model=str,
-                summary="Ejecutar un analisis",
-                description="Ejecuta el analisis para una parcela especifica y devuelve el resultado del diagnostico")
-    def ejecutar_analisis_plaga(usuario_id: str, parcela_id: str):
-        url = os.environ.get('CDN_URL', 'http://cdn.vakajose.live')
-        res = openai.analyze_images_b([f'{url}/nir', f'{url}/red', f'{url}/false_color'])
-        return res
+@router.get("/ejecutarplaga/{usuario_id}/{parcela_id}/", response_model=str,
+                summary="Ejecutar un analisis plaga",
+                description="Ejecuta el analisis para una parcela especifica y devuelve el resultado del diagnostico para tipo plaga")
+def ejecutar_analisis_plaga(usuario_id: str, parcela_id: str):
+    url = os.environ.get('CDN_URL', 'http://cdn.vakajose.live')
+    res = openai.analyze_images_b([f'{url}/nir', f'{url}/red', f'{url}/false_color'])
+    return res
