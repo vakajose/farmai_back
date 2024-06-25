@@ -64,7 +64,7 @@ class SentinelHubService:
 
         polygon_coords = self.convert_points_to_coordinates(parcela.ubicacion)
 
-        img_prefix = f'{datetime.now().strftime('%Y%m%d')}_{tipo_analisis}_{parcela.id}_{parcela.usuario_id}'
+        img_prefix = f"{datetime.now().strftime('%Y%m%d')}_{tipo_analisis}_{parcela.id}_{parcela.usuario_id}"
 
         images = self._fetch_images_from_sentinel(polygon_coords, bandas,img_prefix,tipo_analisis)
         return images
