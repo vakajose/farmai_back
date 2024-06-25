@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth, parcela, analisis
+from routers import auth, parcela, analisis, analysis
 import os
 import logging
 from dotenv import load_dotenv
@@ -30,6 +30,10 @@ app.add_middleware(
 if not os.path.exists('logs'):
     os.makedirs('logs')
 
+# Configurar imagenes
+if not os.path.exists('img'):
+    os.makedirs('img')
+
 level = os.getenv('LOG_LEVEL', 'INFO')
 
 logging.basicConfig(filename='logs/app.log', level=level, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -37,6 +41,7 @@ logging.basicConfig(filename='logs/app.log', level=level, format='%(asctime)s - 
 # Incluir los routers
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(parcela.router, prefix="/parcelas", tags=["parcelas"])
+app.include_router(analysis.router, prefix="/analysis", tags=["analysis"])
 app.include_router(analisis.router, prefix="/analisis", tags=["analisis"])
 
 
