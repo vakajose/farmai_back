@@ -2,8 +2,12 @@ from fastapi import APIRouter, UploadFile, File
 from typing import List
 import os
 from services.openai import *
+from pydantic import BaseModel
 
 router = APIRouter()
+class DiagnosisRequest(BaseModel):
+    diagnosis_type: str
+    image_paths: List[str]
 
 diagnosis_bands = {
     "NDVI": ["B08", "B04"],
@@ -32,7 +36,10 @@ diagnosis_frequency = {
 }
 
 @router.post("/analyze")
-async def analyze_diagnosis(diagnosis_type: str, image_paths: List[str]):
+async def analyze_diagnosis(request: DiagnosisRequest):
+    diagnosis_type = request.diagnosis_type
+    image_paths = request.image_paths
+    
     if diagnosis_type not in diagnosis_bands:
         return {"error": "Invalid diagnosis type"}
 
