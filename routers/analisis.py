@@ -111,5 +111,5 @@ def ejecutar_analisis(usuario_id: str, parcela_id: str, tipo: str = 'identificac
                 description="Ejecuta el analisis para una parcela especifica y devuelve el resultado del diagnostico")
     def ejecutar_analisis_plaga(usuario_id: str, parcela_id: str):
         url = os.environ.get('CDN_URL', 'http://cdn.vakajose.live')
-        respuesta = openai.analyze_images_b([f'{url}/nir', f'{url}/red', f'{url}/false_color'])
-        return respuesta
+        res = openai.analyze_images_b([f'{url}/nir', f'{url}/red', f'{url}/false_color'])
+        return res
