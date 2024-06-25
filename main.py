@@ -30,6 +30,10 @@ app.add_middleware(
 if not os.path.exists('logs'):
     os.makedirs('logs')
 
+# Configurar imagenes
+if not os.path.exists('img'):
+    os.makedirs('img')
+
 level = os.getenv('LOG_LEVEL', 'INFO')
 
 logging.basicConfig(filename='logs/app.log', level=level, format='%(asctime)s - %(levelname)s - %(message)s')

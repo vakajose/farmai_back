@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
-from models import Analisis
-from schemas import AnalisisCreate, AnalisisResponse
+from models import Analisis, Parcela
+from schemas import AnalisisCreate, AnalisisResponse,ImagenSatelital
 from typing import List
+from services import sentinelhub, openai
 
 router = APIRouter()
 
@@ -74,3 +75,29 @@ def get_last_analisis_by_tipo(usuario_id: str, parcela_id: str, tipo: str):
     if analisis:
         return analisis
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Analisis no encontrado")
+
+
+@router.get("/ejecutar/{usuario_id}/{parcela_id}/{tipo}", response_model=List[ImagenSatelital],
+            summary="Ejecutar un analisis",
+            description="Ejecuta el analisis para una parcela especifica y devuelve el resultado del diagnostico")
+def ejecutar_analisis(usuario_id: str, parcela_id: str, tipo: str):
+    #Traer las imagenes en funcion del tipo de analisis desde sentinelHub
+    try:
+        sentinel_hub_service = sentinelhub.SentinelHubService()
+        parcela = Parcela.get_by_id(usuario_id, parcela_id)
+        imagenes = sentinel_hub_service.fetch_images(parcela, tipo)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    #return imagenes
+    #Si existe las imagenes, realizar el analisis con OpenAI
+    if imagenes:
+        nuevo_analisis = Analisis(tipo=tipo, imagenes=imagenes)
+        nuevo_analisis.save(usuario_id, parcela_id)
+        return imagenes
+    #     respuesta = openai.analyze_images(tipo, imagenes)
+    #     #si existe respuesta, guardar el analisis
+    #     if respuesta:
+    #         analisis = Analisis(tipo=tipo, imagenes=imagenes, evaluacion=respuesta)
+    #         analisis.save(usuario_id, parcela_id)
+    #         return respuesta
+

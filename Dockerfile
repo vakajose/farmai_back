@@ -19,6 +19,9 @@ EXPOSE 8000
 # Crear directorio de logs
 RUN mkdir -p /app/logs
 
+# Crear directorio de img
+RUN mkdir -p /app/img
+
 # Comando para ejecutar la aplicación
 #CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000 > /app/logs/stdout.log 2>&1"]

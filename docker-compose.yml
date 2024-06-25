@@ -11,7 +11,7 @@ services:
     volumes:
       - .:/app
       - ./logs:/app/logs
-      - .${STORAGE_HOST_PATH}:${STORAGE_CONTAINER_PATH}
+      - ${STORAGE_HOST_PATH}:/app${STORAGE_CONTAINER_PATH}
     ports:
       - "8000:8000"
     networks:

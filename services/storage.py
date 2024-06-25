@@ -5,8 +5,9 @@ load_dotenv()
 
 class StorageService:
     def __init__(self):
-        self.storage_path = os.getenv('STORAGE_CONTAINER_PATH', 'images')
-
+        # Obtener la ruta raiz del proyecto
+        self.storage_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), os.getenv('STORAGE_CONTAINER_PATH', 'images'))
+        print(f"Ruta de almacenamiento: Storage path: {self.storage_path}")
     def save_image(self, image_data: bytes, filename: str) -> str:
         # Crear directorio si no existe
         os.makedirs(self.storage_path, exist_ok=True)

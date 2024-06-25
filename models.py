@@ -66,7 +66,6 @@ class ImagenSatelital(BaseModel):
     tipo: str
     ruta: str
 
-
 class Parcela(BaseModel):
     id: Optional[str]
     nombre: str
