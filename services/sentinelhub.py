@@ -160,7 +160,7 @@ def _get_data_by_tipo(tipo: str, polygon_coords):
                 "bounds": {
                     "geometry": {
                         "type": "Polygon",
-                        "coordinates": [polygon_coords]
+                        "coordinates": polygon_coords
                     }
                 },
                 "data": [
@@ -254,7 +254,7 @@ def _get_data_by_tipo(tipo: str, polygon_coords):
                 "bounds": {
                     "geometry": {
                         "type": "Polygon",
-                        "coordinates": [polygon_coords]
+                        "coordinates": polygon_coords
                     }
                 },
                 "data": [
@@ -342,7 +342,7 @@ def _get_data_by_tipo(tipo: str, polygon_coords):
                 "bounds": {
                     "geometry": {
                         "type": "Polygon",
-                        "coordinates": [polygon_coords]
+                        "coordinates": polygon_coords
                     }
                 },
                 "data": [
