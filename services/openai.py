@@ -47,7 +47,7 @@ def analyze_images(diagnosis_type: str, images: List[ImagenSatelital]) -> str:
 
 
 def _get_instructions(diagnosis_type):
-    gen = f"El informe debe contener el diagnostico, recomendaciones y en caso de encontrar irregularidades sugerencias de soluciones. El informe debe ser dinámico y amigable con el usuario, formateado en markdown. Utiliza emojis para resaltar títulos y puntos importantes y usar tablas si es necesario. Valida la veracidad de la información antes de enviarla al usuario. Verifica que el formato markdown sea valido"
+    gen = os.getenv('PROMPT_BASE' or '')
     if diagnosis_type == 'maleza':
         return f"Por favor, analiza las siguientes imágenes satelitales para la detección de malezas en el área agrícola especificada. Las imágenes corresponden a las bandas B02 (Blue), B03 (Green), B04 (Red) y B08 (NIR) y la combinada de todas las anteriores. Evalúa la presencia de malezas y genera un informe detallado. {gen}"
     elif diagnosis_type == 'nutricion':
