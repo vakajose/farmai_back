@@ -123,37 +123,7 @@ def _get_data_by_tipo(tipo: str, polygon_coords):
     from_date_str = from_date.isoformat() + "Z"
 
     if tipo == 'maleza':
-        evalscript = """
-            //VERSION=3
-
-            function setup() {
-              return {
-                input: ["B02", "B03", "B04", "B08"],
-                output: [
-                  { id: "blue", bands: 1 },
-                  { id: "green", bands: 1 },
-                  { id: "red", bands: 1 },
-                  { id: "nir", bands: 1 },
-                  { id: "combined", bands: 3 }
-                ]
-              };
-            }
-
-            function evaluatePixel(sample) {
-              let blue = sample.B02;
-              let green = sample.B03;
-              let red = sample.B04;
-              let nir = sample.B08;
-
-              return {
-                blue: [blue],
-                green: [green],
-                red: [red],
-                nir: [nir],
-                combined: [nir, red, green]
-              };
-            }
-            """
+        evalscript = "//VERSION=3\nfunction setup() { return { input: ['B02', 'B03', 'B04', 'B08'], output: [ { id: 'blue', bands: 1 }, { id: 'green', bands: 1 }, { id: 'red', bands: 1 }, { id: 'nir', bands: 1 }, { id: 'combined', bands: 3 } ] }; }\nfunction evaluatePixel(sample) { let blue = sample.B02; let green = sample.B03; let red = sample.B04; let nir = sample.B08; return { blue: [blue], green: [green], red: [red], nir: [nir], combined: [nir, red, green] }; }"
 
         payload = {
             "input": {
@@ -220,34 +190,7 @@ def _get_data_by_tipo(tipo: str, polygon_coords):
 
         return payload
     elif tipo == 'nutricion':
-        evalscript = """
-            //VERSION=3
-
-            function setup() {
-              return {
-                input: ["B04", "B08", "B11"],
-                output: [
-                  { id: "red", bands: 1 },
-                  { id: "nir", bands: 1 },
-                  { id: "swir", bands: 1 },
-                  { id: "combined", bands: 3 }
-                ]
-              };
-            }
-
-            function evaluatePixel(sample) {
-              let red = sample.B04;
-              let nir = sample.B08;
-              let swir = sample.B11;
-
-              return {
-                red: [red],
-                nir: [nir],
-                swir: [swir],
-                combined: [nir, red, swir]
-              };
-            }
-            """
+        evalscript = "//VERSION=3\nfunction setup() { return { input: ['B04', 'B08', 'B11'], output: [ { id: 'red', bands: 1 }, { id: 'nir', bands: 1 }, { id: 'swir', bands: 1 }, { id: 'combined', bands: 3 } ] }; }\nfunction evaluatePixel(sample) { let red = sample.B04; let nir = sample.B08; let swir = sample.B11; return { red: [red], nir: [nir], swir: [swir], combined: [nir, red, swir] }; }"
 
         payload = {
             "input": {
@@ -308,34 +251,7 @@ def _get_data_by_tipo(tipo: str, polygon_coords):
 
         return payload
     elif tipo == 'plagas':
-        evalscript = """
-            //VERSION=3
-
-            function setup() {
-              return {
-                input: ["B08", "B11", "B12"],
-                output: [
-                  { id: "nir", bands: 1 },
-                  { id: "swir1", bands: 1 },
-                  { id: "swir2", bands: 1 },
-                  { id: "combined", bands: 3 }
-                ]
-              };
-            }
-
-            function evaluatePixel(sample) {
-              let nir = sample.B08;
-              let swir1 = sample.B11;
-              let swir2 = sample.B12;
-
-              return {
-                nir: [nir],
-                swir1: [swir1],
-                swir2: [swir2],
-                combined: [swir2, swir1, nir]
-              };
-            }
-            """
+        evalscript = "//VERSION=3\nfunction setup() { return { input: ['B08', 'B11', 'B12'], output: [ { id: 'nir', bands: 1 }, { id: 'swir1', bands: 1 }, { id: 'swir2', bands: 1 }, { id: 'combined', bands: 3 } ] }; }\nfunction evaluatePixel(sample) { let nir = sample.B08; let swir1 = sample.B11; let swir2 = sample.B12; return { nir: [nir], swir1: [swir1], swir2: [swir2], combined: [swir2, swir1, nir] }; }"
 
         payload = {
             "input": {
