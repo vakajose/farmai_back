@@ -190,7 +190,7 @@ class Analisis(BaseModel):
         if not self.fecha:
             self.fecha = datetime.now()
         if not self.id:
-            self.id = f"{self.fecha.strftime('%Y%m%d')}_{self.tipo}"
+            self.id = f"{self.fecha.strftime('%Y%m%d%H%M%S')}_{self.tipo}"
         parcela_ref = db.document(f'{prefix}users/{usuario_id}/parcelas/{parcela_id}')
         if not parcela_ref.get().exists:
             raise ValueError("Parcela no existe")

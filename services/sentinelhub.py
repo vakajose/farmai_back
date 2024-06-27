@@ -1,13 +1,10 @@
 from typing import List
-import tarfile
-import io
 import requests
-from models import Parcela, Analisis, ImagenSatelital, Punto
+from models import Parcela, Analisis, Punto
 from services.storage import StorageService
 from dotenv import load_dotenv
 import os
-import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 load_dotenv()
 
@@ -18,7 +15,6 @@ class SentinelHubService:
         self.client_id = os.getenv('SENTINEL_CLIENT_ID')
         self.client_secret = os.getenv('SENTINEL_CLIENT_SECRET')
         self.access_token = self.get_access_token()
-        print(self.access_token)
 
     def get_access_token(self):
         print('Getting access token')
@@ -58,19 +54,15 @@ class SentinelHubService:
             'mapeo_cultivos': ['B02', 'B03', 'B04', 'B08', 'VV', 'VH'],  # RGB + NIR + Radar
         }
 
-        bandas = bandas_map.get(tipo_analisis)
-        if not bandas:
-            raise ValueError(f"Tipo de análisis no soportado: {tipo_analisis}")
-
         # polygon_coords = [(punto.longitude, punto.latitude) for punto in parcela.ubicacion]
         # polygon_coords.append(polygon_coords[0])  # Cerrar el polígono
 
         polygon_coords = self.convert_points_to_coordinates(parcela.ubicacion)
         print('PolygonCords: ', polygon_coords)
-        analisis_id = f"{datetime.now().strftime('%Y%m%d')}_{tipo_analisis}"
+        analisis_id = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{tipo_analisis}"
 
         images = self._fetch_images_from_sentinel(polygon_coords, analisis_id, parcela, tipo_analisis)
-        return images
+        return images, analisis_id
 
     def _fetch_images_from_sentinel(self, polygon_coords, analisis_id, parcela, tipo_analisis):
         url = f'https://services.sentinel-hub.com/api/v1/process'
@@ -122,74 +114,284 @@ class SentinelHubService:
 
 
 def _get_data_by_tipo(tipo: str, polygon_coords):
-    if tipo == 'estres_hidrico':
-        return """
-            
+    # Obtener la fecha actual y la fecha de hace un mes
+    to_date = datetime.now()
+    from_date = to_date - timedelta(days=30)
+
+    # Formatear las fechas al formato ISO 8601
+    to_date_str = to_date.isoformat() + "Z"
+    from_date_str = from_date.isoformat() + "Z"
+
+    if tipo == 'maleza':
+        evalscript = """
+            //VERSION=3
+
+            function setup() {
+              return {
+                input: ["B02", "B03", "B04", "B08"],
+                output: [
+                  { id: "blue", bands: 1 },
+                  { id: "green", bands: 1 },
+                  { id: "red", bands: 1 },
+                  { id: "nir", bands: 1 },
+                  { id: "combined", bands: 3 }
+                ]
+              };
+            }
+
+            function evaluatePixel(sample) {
+              let blue = sample.B02;
+              let green = sample.B03;
+              let red = sample.B04;
+              let nir = sample.B08;
+
+              return {
+                blue: [blue],
+                green: [green],
+                red: [red],
+                nir: [nir],
+                combined: [nir, red, green]
+              };
+            }
             """
-    elif tipo == 'estado_vegetacion':
-        return """
-            
-            """
-    elif tipo == 'plagas':
-        return {
+
+        payload = {
             "input": {
                 "bounds": {
                     "geometry": {
                         "type": "Polygon",
-                        "coordinates": polygon_coords
+                        "coordinates": [polygon_coords]
                     }
                 },
                 "data": [
                     {
+                        "type": "sentinel-2-l2a",
                         "dataFilter": {
                             "timeRange": {
-                                "from": "2024-05-25T00:00:00Z",
-                                "to": "2024-06-25T23:59:59Z"
+                                "from": from_date_str,
+                                "to": to_date_str
                             },
-                            "maxCloudCoverage": 0
+                            "maxCloudCoverage": 20
                         },
                         "processing": {
                             "harmonizeValues": True
-                        },
-                        "type": "sentinel-2-l2a"
+                        }
                     }
                 ]
             },
             "output": {
-                "width": 1024,
-                "height": 1024,
+                "width": 2048,
+                "height": 2048,
                 "responses": [
                     {
-                        "identifier": f"blue",
+                        "identifier": "blue",
                         "format": {
                             "type": "image/png"
                         }
                     },
                     {
-                        "identifier": f"green",
+                        "identifier": "green",
                         "format": {
                             "type": "image/png"
                         }
                     },
                     {
-                        "identifier": f"red",
+                        "identifier": "red",
                         "format": {
                             "type": "image/png"
                         }
                     },
                     {
-                        "identifier": f"nir",
+                        "identifier": "nir",
                         "format": {
                             "type": "image/png"
                         }
                     },
                     {
-                        "identifier": f"combined",
+                        "identifier": "combined",
                         "format": {
                             "type": "image/png"
                         }
                     }
+                ],
+                "evalscript": evalscript
+            }
+        }
+
+        return payload
+    elif tipo == 'nutricion':
+        evalscript = """
+            //VERSION=3
+
+            function setup() {
+              return {
+                input: ["B04", "B08", "B11"],
+                output: [
+                  { id: "red", bands: 1 },
+                  { id: "nir", bands: 1 },
+                  { id: "swir", bands: 1 },
+                  { id: "combined", bands: 3 }
+                ]
+              };
+            }
+
+            function evaluatePixel(sample) {
+              let red = sample.B04;
+              let nir = sample.B08;
+              let swir = sample.B11;
+
+              return {
+                red: [red],
+                nir: [nir],
+                swir: [swir],
+                combined: [nir, red, swir]
+              };
+            }
+            """
+
+        payload = {
+            "input": {
+                "bounds": {
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [polygon_coords]
+                    }
+                },
+                "data": [
+                    {
+                        "type": "sentinel-2-l2a",
+                        "dataFilter": {
+                            "timeRange": {
+                                "from": from_date_str,
+                                "to": to_date_str
+                            },
+                            "maxCloudCoverage": 20
+                        },
+                        "processing": {
+                            "harmonizeValues": True
+                        }
+                    }
                 ]
             },
-            "evalscript": "//VERSION=3\n\nfunction setup() {\n  return {\n    input: [\"B02\", \"B03\", \"B04\", \"B08\"],\n    output: [\n      { id: \"" + f"blue" + "\", bands: 1 },\n      { id: \"" + f"green" + "\", bands: 1 },\n      { id: \"" + f"red" + "\", bands: 1 },\n      { id: \"" + f"nir" + "\", bands: 1 },\n      { id: \"" + f"combined" + "\", bands: 3 }\n    ]\n " + " };\n}\n\nfunction evaluatePixel(sample) {\n  let blue = sample.B02;\n  let green = sample.B03;\n  let red = sample.B04;\n  let nir = sample.B08;\n\n  return {\n    " + f"blue: [blue],\n    green: [green],\n    red: [red],\n    nir: [nir],\n    combined" + ": [nir, red, green]\n  };\n}\n"
+            "output": {
+                "width": 2048,
+                "height": 2048,
+                "responses": [
+                    {
+                        "identifier": "red",
+                        "format": {
+                            "type": "image/png"
+                        }
+                    },
+                    {
+                        "identifier": "nir",
+                        "format": {
+                            "type": "image/png"
+                        }
+                    },
+                    {
+                        "identifier": "swir",
+                        "format": {
+                            "type": "image/png"
+                        }
+                    },
+                    {
+                        "identifier": "combined",
+                        "format": {
+                            "type": "image/png"
+                        }
+                    }
+                ],
+                "evalscript": evalscript
+            }
         }
+
+        return payload
+    elif tipo == 'plagas':
+        evalscript = """
+            //VERSION=3
+
+            function setup() {
+              return {
+                input: ["B08", "B11", "B12"],
+                output: [
+                  { id: "nir", bands: 1 },
+                  { id: "swir1", bands: 1 },
+                  { id: "swir2", bands: 1 },
+                  { id: "combined", bands: 3 }
+                ]
+              };
+            }
+
+            function evaluatePixel(sample) {
+              let nir = sample.B08;
+              let swir1 = sample.B11;
+              let swir2 = sample.B12;
+
+              return {
+                nir: [nir],
+                swir1: [swir1],
+                swir2: [swir2],
+                combined: [swir2, swir1, nir]
+              };
+            }
+            """
+
+        payload = {
+            "input": {
+                "bounds": {
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [polygon_coords]
+                    }
+                },
+                "data": [
+                    {
+                        "type": "sentinel-2-l2a",
+                        "dataFilter": {
+                            "timeRange": {
+                                "from": from_date_str,
+                                "to": to_date_str
+                            },
+                            "maxCloudCoverage": 20
+                        },
+                        "processing": {
+                            "harmonizeValues": True
+                        }
+                    }
+                ]
+            },
+            "output": {
+                "width": 2048,
+                "height": 2048,
+                "responses": [
+                    {
+                        "identifier": "nir",
+                        "format": {
+                            "type": "image/png"
+                        }
+                    },
+                    {
+                        "identifier": "swir1",
+                        "format": {
+                            "type": "image/png"
+                        }
+                    },
+                    {
+                        "identifier": "swir2",
+                        "format": {
+                            "type": "image/png"
+                        }
+                    },
+                    {
+                        "identifier": "combined",
+                        "format": {
+                            "type": "image/png"
+                        }
+                    }
+                ],
+                "evalscript": evalscript
+            }
+        }
+
+        return payload
