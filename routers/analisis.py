@@ -88,23 +88,26 @@ def ejecutar_analisis(usuario_id: str, parcela_id: str, tipo: str = 'identificac
     #Traer las imagenes en funcion del tipo de analisis desde sentinelHub
     try:
         sentinel_hub_service = sentinelhub.SentinelHubService()
+        #obtengo datos de parcela
         parcela = Parcela.get_by_id(usuario_id, parcela_id)
+        #busco las imagenes en funcion del tipo de analisis y la parcela, y se guardan en la ruta indicada
         imagenes = sentinel_hub_service.fetch_images(parcela, tipo)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    #return imagenes
-    #Si existe las imagenes, realizar el analisis con OpenAI
+
+    #Si existen las imagenes, crear el analisis y guardar en firebase
     if imagenes:
         nuevo_analisis = Analisis(tipo=tipo, imagenes=imagenes)
         nuevo_analisis.save(usuario_id, parcela_id)
 
+        #analizar las imagenes con OpenAI
         respuesta = openai.analyze_images(tipo, imagenes)
 
         #si existe respuesta, actualizar el analisis
         if respuesta:
             nuevo_analisis.evaluacion = respuesta
             nuevo_analisis.save(usuario_id, parcela_id)
-            return nuevo_analisis
+        return AnalisisResponse(**nuevo_analisis.to_dict())
 
 @router.get("/ejecutarplaga/{usuario_id}/{parcela_id}/", response_model=str,
                 summary="Ejecutar un analisis plaga",
