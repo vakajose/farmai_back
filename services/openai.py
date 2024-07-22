@@ -11,9 +11,6 @@ client = OpenAI(
     project=os.getenv('OPENAI_PROJECT_ID'),
 )
 
-
-
-
 def analyze_images(diagnosis_type: str, images: List[ImagenSatelital]) -> str:
     url = os.getenv('CDN_URL' or 'http://cdn.vakajose.live')
     image_paths = [f"{url}/{img.ruta}" for img in images]
@@ -38,9 +35,9 @@ def analyze_images(diagnosis_type: str, images: List[ImagenSatelital]) -> str:
         })
 
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model=os.getenv('OPENAI_MODEL') or 'gpt-4o-mini',
         messages=messages,
-        max_tokens=1000,
+        max_tokens=2000,
     )
 
     return response.choices[0].message.content.strip()
