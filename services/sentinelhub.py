@@ -27,17 +27,22 @@ class SentinelHubService:
         self.instance_id = os.getenv('SENTINEL_INSTANCE_ID')
         self.client_id = os.getenv('SENTINEL_CLIENT_ID')
         self.client_secret = os.getenv('SENTINEL_CLIENT_SECRET')
+        self.oauth_url = os.getenv('SENTINEL_OAUTH_URL')
+        self.process_url = os.getenv('SENTINEL_PROCESS_URL')
         self.access_token = self.get_access_token()
 
     def get_access_token(self):
         print('Getting access token')
-        url = 'https://services.sentinel-hub.com/oauth/token'
+        url = self.oauth_url
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
         payload = {
             'grant_type': 'client_credentials',
             'client_id': self.client_id,
             'client_secret': self.client_secret
         }
-        response = requests.post(url, data=payload)
+        response = requests.post(url, data=payload, headers=headers)
         response.raise_for_status()
         return response.json()['access_token']
 
@@ -51,7 +56,7 @@ class SentinelHubService:
         return images, analisis_id
 
     def _fetch_images_from_sentinel(self, polygon_coords, analisis_id, parcela, tipo_analisis):
-        url = f'https://services.sentinel-hub.com/api/v1/process'
+        url = self.process_url
         headers = {
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {self.access_token}',
